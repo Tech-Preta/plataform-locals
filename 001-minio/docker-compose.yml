@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  traefik:
+    image: traefik:v2.4.5
+    container_name: traefik
+    command: [ '--providers.docker', '--api.insecure' ]
+    networks:
+      - contained
+    ports:
+      - 80:80
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - "traefik.http.routers.traefik.rule=Host(`traefik.localdns.xyz`)"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    command: server /export
+    environment:
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-myusername}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-mypassword}
+    volumes:
+      - minio-data:/export
+    networks:
+      - contained
+    depends_on:
+      - traefik
+    labels:
+      - "traefik.http.routers.minio.rule=Host(`minio.localdns.xyz`)"
+      - "traefik.http.services.minio.loadbalancer.server.port=9000"
+
+volumes:
+  minio-data:
+    name: minio-data
+
+networks:
+  contained:
+    name: contained
