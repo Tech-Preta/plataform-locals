@@ -153,9 +153,9 @@ curl -k -X POST -d '{"secret_shares":1,"secret_threshold":1}' \
     "c470a9a48d4395202ad5ff4f2a4e085baed8f037bf0e5b11649754294db31364"
   ],
   "keys_base64": [
-    "xHCppI1DlSAq1f9PKk4IW67Y8De/DlsRZJdUKU2zE2Q="
+    "EXEMPLO_BASE64_KEY_AQUI="
   ],
-  "root_token": "hvs.aUF4yWRperC35xAwmXUJMQwc"
+  "root_token": "hvs.EXEMPLO_ROOT_TOKEN_AQUI"
 }
 ```
 
@@ -242,7 +242,7 @@ curl -k https://localhost:443/v1/sys/init
 1. **Acesse:** `https://localhost:443`
 2. **Método de autenticação:** Selecione **Token**
 3. **Token:** Cole o `root_token` obtido na inicialização
-   - Exemplo: `hvs.aUF4yWRperC35xAwmXUJMQwc`
+   - Exemplo: `hvs.EXEMPLO_ROOT_TOKEN_AQUI`
 4. **Clique em:** **Sign In**
 
 ### Exemplo de processo completo:
@@ -414,9 +414,9 @@ export VAULT_TOKEN="seu_root_token_aqui"
 ### Exemplo de token e chave obtidos na inicialização:
 ```json
 {
-  "keys": ["c470a9a48d4395202ad5ff4f2a4e085baed8f037bf0e5b11649754294db31364"],
-  "keys_base64": ["xHCppI1DlSAq1f9PKk4IW67Y8De/DlsRZJdUKU2zE2Q="],
-  "root_token": "hvs.aUF4yWRperC35xAwmXUJMQwc"
+  "keys": ["EXEMPLO_HEX_KEY_AQUI"],
+  "keys_base64": ["EXEMPLO_BASE64_KEY_AQUI="],
+  "root_token": "hvs.EXEMPLO_ROOT_TOKEN_AQUI"
 }
 ```
 
