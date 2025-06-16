@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traefik Test App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        h1 {
+            color: #fff;
+            text-align: center;
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border-left: 4px solid #00ff88;
+        }
+
+        .success {
+            color: #00ff88;
+        }
+
+        .links {
+            margin-top: 30px;
+        }
+
+        .links a {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .links a:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🚀 Traefik Test Application</h1>
+
+        <div class="info-box">
+            <h2 class="success">✅ Success!</h2>
+            <p>If you can see this page, Traefik is working correctly!</p>
+        </div>
+
+        <div class="info-box">
+            <h3>📊 Request Information</h3>
+            <p><strong>URL:</strong> <code>app.localhost</code></p>
+            <p><strong>Served by:</strong> Nginx via Traefik</p>
+            <p><strong>Middlewares:</strong> compression, security-headers</p>
+        </div>
+
+        <div class="info-box">
+            <h3>🔗 Test Links</h3>
+            <div class="links">
+                <a href="http://traefik.localhost:8080" target="_blank">📊 Traefik Dashboard</a>
+                <a href="http://api.localhost" target="_blank">🔌 API Example</a>
+                <a href="http://admin.localhost" target="_blank">🔐 Admin Panel</a>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>🧪 How to Test</h3>
+            <ol>
+                <li>Add to your <code>/etc/hosts</code>:
+                    <br><code>127.0.0.1 app.localhost api.localhost admin.localhost traefik.localhost</code>
+                </li>
+                <li>Start test services: <code>docker compose -f test-services.yml up -d</code></li>
+                <li>Visit the links above to test different configurations</li>
+            </ol>
+        </div>
+
+        <div class="info-box">
+            <h3>📈 Headers Added by Traefik</h3>
+            <p>Check your browser's developer tools to see security headers added by the security-headers middleware:
+            </p>
+            <ul>
+                <li><code>X-Frame-Options: SAMEORIGIN</code></li>
+                <li><code>X-Content-Type-Options: nosniff</code></li>
+                <li><code>X-XSS-Protection: 1; mode=block</code></li>
+                <li><code>Strict-Transport-Security</code></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Show current timestamp
+        document.addEventListener('DOMContentLoaded', function () {
+            const timestamp = new Date().toLocaleString();
+            const timestampElement = document.createElement('p');
+            timestampElement.innerHTML = '<strong>Page loaded at:</strong> ' + timestamp;
+            timestampElement.style.textAlign = 'center';
+            timestampElement.style.marginTop = '20px';
+            timestampElement.style.fontSize = '0.9em';
+            timestampElement.style.opacity = '0.8';
+            document.querySelector('.container').appendChild(timestampElement);
+        });
+    </script>
+</body>
+
+</html>

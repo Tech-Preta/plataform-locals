@@ -1,0 +1,67 @@
+version: "3.8"
+
+# Example application to test Traefik
+# This creates a simple nginx service that will be proxied by Traefik
+
+services:
+  # Simple web application
+  webapp:
+    image: nginx:alpine
+    container_name: test-webapp
+    restart: unless-stopped
+    volumes:
+      - ./html:/usr/share/nginx/html:ro
+    labels:
+      # Enable Traefik
+      - traefik.enable=true
+
+      # HTTP Router
+      - traefik.http.routers.webapp.rule=Host(`app.localhost`)
+      - traefik.http.routers.webapp.entrypoints=web
+      - traefik.http.services.webapp.loadbalancer.server.port=80
+
+      # Add middlewares
+      - traefik.http.routers.webapp.middlewares=compression,security-headers
+
+      # Health check
+      - traefik.http.services.webapp.loadbalancer.healthcheck.path=/
+      - traefik.http.services.webapp.loadbalancer.healthcheck.interval=30s
+
+    networks:
+      - traefik-network
+
+  # API example
+  api-example:
+    image: httpd:alpine
+    container_name: test-api
+    restart: unless-stopped
+    volumes:
+      - ./api:/usr/local/apache2/htdocs:ro
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.api.rule=Host(`api.localhost`)
+      - traefik.http.routers.api.entrypoints=web
+      - traefik.http.services.api.loadbalancer.server.port=80
+      - traefik.http.routers.api.middlewares=rate-limit,security-headers
+    networks:
+      - traefik-network
+
+  # Admin example (with basic auth)
+  admin-example:
+    image: nginx:alpine
+    container_name: test-admin
+    restart: unless-stopped
+    volumes:
+      - ./admin:/usr/share/nginx/html:ro
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.admin.rule=Host(`admin.localhost`)
+      - traefik.http.routers.admin.entrypoints=web
+      - traefik.http.services.admin.loadbalancer.server.port=80
+      - traefik.http.routers.admin.middlewares=basic-auth,admin-whitelist,security-headers
+    networks:
+      - traefik-network
+
+networks:
+  traefik-network:
+    external: true

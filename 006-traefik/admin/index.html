@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .warning {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .security-info {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🔐 Admin Panel</h1>
+
+        <div class="warning">
+            <h3>⚠️ Protected Area</h3>
+            <p>This page is protected by basic authentication and IP whitelist.</p>
+            <p>If you can see this page, you have successfully authenticated!</p>
+        </div>
+
+        <div class="security-info">
+            <h3>🛡️ Security Measures Applied</h3>
+            <ul>
+                <li><strong>Basic Authentication:</strong> Username/password required</li>
+                <li><strong>IP Whitelist:</strong> Only allowed IPs can access</li>
+                <li><strong>Security Headers:</strong> Additional security headers</li>
+            </ul>
+        </div>
+
+        <div class="security-info">
+            <h3>📋 Default Credentials</h3>
+            <p><strong>Username:</strong> <code>admin</code></p>
+            <p><strong>Password:</strong> <code>admin</code></p>
+            <p><em>Note: Change these in production!</em></p>
+        </div>
+
+        <div class="security-info">
+            <h3>🔧 Configuration</h3>
+            <p>This admin panel demonstrates Traefik's security middlewares:</p>
+            <ul>
+                <li><code>basic-auth</code> - HTTP Basic Authentication</li>
+                <li><code>admin-whitelist</code> - IP address filtering</li>
+                <li><code>security-headers</code> - Security headers</li>
+            </ul>
+        </div>
+
+        <p><strong>Allowed IP Ranges:</strong></p>
+        <ul>
+            <li>127.0.0.1/32 (localhost)</li>
+            <li>10.0.0.0/8 (private network)</li>
+            <li>172.16.0.0/12 (private network)</li>
+            <li>192.168.0.0/16 (private network)</li>
+        </ul>
+    </div>
+</body>
+
+</html>

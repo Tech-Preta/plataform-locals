@@ -1,0 +1,11 @@
+# k3s_version = "v1.33.1+k3s1"
+
+# Exemplo de configuração com CIDRs customizados
+# cluster_cidr = "10.100.0.0/16"
+# service_cidr = "10.101.0.0/16"
+
+# Exemplo para manter Traefik habilitado
+# disable_components = []
+
+# kubeconfig_path = "~/.kube/config"
+# cluster_name = "techpreta"

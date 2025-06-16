@@ -1,0 +1,93 @@
+# Middlewares Configuration
+http:
+  middlewares:
+    # Security headers
+    security-headers:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Proto: https
+        customResponseHeaders:
+          X-Frame-Options: "SAMEORIGIN"
+          X-Content-Type-Options: "nosniff"
+          X-XSS-Protection: "1; mode=block"
+          Strict-Transport-Security: "max-age=31536000; includeSubDomains"
+          Referrer-Policy: "strict-origin-when-cross-origin"
+          Content-Security-Policy: "default-src 'self'"
+
+    # Rate limiting
+    rate-limit:
+      rateLimit:
+        burst: 100
+        period: 1m
+        average: 50
+
+    # Basic authentication (example)
+    basic-auth:
+      basicAuth:
+        users:
+          # admin:admin (generate with: echo $(htpasswd -nb admin admin) | sed -e s/\\$/\\$\\$/g)
+          - "admin:$$apr1$$ruca84Hq$$mbjdMZBAG.KWn7vfN/SNK/"
+
+    # IP whitelist for admin access
+    admin-whitelist:
+      ipWhiteList:
+        sourceRange:
+          - "127.0.0.1/32"
+          - "10.0.0.0/8"
+          - "172.16.0.0/12"
+          - "192.168.0.0/16"
+
+    # Compress responses
+    compression:
+      compress: {}
+
+    # Strip prefix
+    strip-prefix:
+      stripPrefix:
+        prefixes:
+          - "/api"
+
+    # Redirect scheme
+    redirect-to-https:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+# TLS Configuration
+tls:
+  options:
+    # Modern TLS configuration
+    modern:
+      minVersion: "VersionTLS13"
+      sslStrategies:
+        - "tls.SniStrict"
+
+    # Intermediate TLS configuration (recommended)
+    intermediate:
+      minVersion: "VersionTLS12"
+      maxVersion: "VersionTLS13"
+      cipherSuites:
+        - "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+        - "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305"
+        - "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+        - "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256"
+      curvePreferences:
+        - "CurveP521"
+        - "CurveP384"
+      sslStrategies:
+        - "tls.SniStrict"
+
+    # Default TLS configuration
+    default:
+      minVersion: "VersionTLS12"
+      cipherSuites:
+        - "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+        - "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305"
+        - "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+
+  # Certificate stores
+  stores:
+    default:
+      defaultCertificate:
+        certFile: "/etc/ssl/certs/default.crt"
+        keyFile: "/etc/ssl/private/default.key"

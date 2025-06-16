@@ -1,0 +1,29 @@
+services:
+  vault:
+    image: "hashicorp/vault:1.19.5"
+    restart: unless-stopped
+    container_name: vault
+    ports:
+      - "8201:8201"
+      - "443:8200"
+    environment:
+      VAULT_API_ADDR: "https://localhost:443"
+      VAULT_CACERT: /vault/userconfig/tls/ca.crt
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - ./audit:/vault/audit
+      - ./config:/vault/config
+      - ./data:/vault/data
+      - ./file:/vault/file
+      - ./logs:/vault/logs
+      - ./config/tls:/vault/userconfig/tls
+      - ./plugins:/vault/plugins
+      - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt
+    command: vault server -config=/vault/config/vault-config.hcl
+    networks:
+      - services_net
+
+networks:
+  services_net:
+    driver: bridge

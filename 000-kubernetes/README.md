@@ -165,6 +165,26 @@ cp ~/.kube/config ~/.kube/config.backup
 export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 ```
 
+## 🏷️ Nome do Cluster/Contexto Parametrizável
+
+Agora é possível definir o nome do cluster/contexto do kubeconfig via Terraform usando a variável `cluster_name`.
+
+### Como usar:
+
+```bash
+# Para aplicar com um nome customizado para o cluster/contexto:
+terraform apply -var="cluster_name=meu-cluster"
+```
+
+O nome será refletido em todos os campos relevantes do kubeconfig (cluster, context, user, name).
+
+- O nome do nó exibido em `kubectl get nodes` é o hostname da máquina local.
+- O nome do contexto/cluster pode ser visto com:
+  ```bash
+  kubectl config current-context
+  kubectl config get-contexts
+  ```
+
 ## 🎯 Próximos Passos
 
 ### 1. Instalar Cilium (CNI)
