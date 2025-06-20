@@ -16,24 +16,27 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Logging functions
+# log_info prints an informational message in blue to stdout.
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
 
+# log_success prints a success message in green color to stdout.
 log_success() {
     echo -e "${GREEN}[SUCCESS]${NC} $1"
 }
 
+# log_warning prints a warning message to stdout with yellow color formatting.
 log_warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
+# log_error prints an error message to stderr with red formatting.
 log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Check if Docker is running
+# check_docker verifies that the Docker daemon is running and exits with an error if it is not.
 check_docker() {
     if ! docker info >/dev/null 2>&1; then
         log_error "Docker is not running. Please start Docker first."
@@ -41,7 +44,7 @@ check_docker() {
     fi
 }
 
-# Create Traefik network if it doesn't exist
+# create_network checks for the existence of the Traefik Docker network and creates it if it does not exist.
 create_network() {
     if ! docker network ls | grep -q "$NETWORK_NAME"; then
         log_info "Creating Traefik network: $NETWORK_NAME"
@@ -52,7 +55,7 @@ create_network() {
     fi
 }
 
-# Set proper permissions for Let's Encrypt
+# setup_permissions ensures required files and directories for Let's Encrypt and logging exist with secure permissions.
 setup_permissions() {
     log_info "Setting up permissions..."
     
@@ -70,7 +73,8 @@ setup_permissions() {
     log_success "Permissions set correctly"
 }
 
-# Generate basic auth hash
+# generate_auth outputs a basic authentication hash for use with Traefik, using provided or default credentials.
+# If the `htpasswd` utility is unavailable, a default hash is returned and a warning is logged.
 generate_auth() {
     local username="${1:-admin}"
     local password="${2:-admin}"
@@ -83,7 +87,7 @@ generate_auth() {
     fi
 }
 
-# Start Traefik
+# start launches the Traefik service using Docker Compose, ensuring prerequisites like Docker, network, and permissions are set up before starting containers and displaying dashboard access information.
 start() {
     log_info "Starting Traefik..."
     
@@ -99,7 +103,7 @@ start() {
     log_info "Or at: http://traefik.localhost (add to /etc/hosts if needed)"
 }
 
-# Stop Traefik
+# stop shuts down Traefik containers managed by Docker Compose.
 stop() {
     log_info "Stopping Traefik..."
     
@@ -109,7 +113,7 @@ stop() {
     log_success "Traefik stopped successfully!"
 }
 
-# Restart Traefik
+# restart stops and then starts Traefik containers, effectively restarting the Traefik service.
 restart() {
     log_info "Restarting Traefik..."
     stop
@@ -117,7 +121,7 @@ restart() {
     start
 }
 
-# Show status
+# status displays the current status of Traefik containers and the associated Docker network, including the number of connected containers.
 status() {
     log_info "Traefik Status:"
     
@@ -134,7 +138,7 @@ status() {
     fi
 }
 
-# Show logs
+# logs displays the last N lines of logs for a specified Docker Compose service, defaulting to the Traefik service.
 logs() {
     local service="${1:-traefik}"
     local lines="${2:-50}"
@@ -145,7 +149,7 @@ logs() {
     docker compose logs --tail="$lines" -f "$service"
 }
 
-# Validate configuration
+# validate checks the Docker Compose and dynamic Traefik configuration for syntax errors and verifies the presence of dynamic config files.
 validate() {
     log_info "Validating Traefik configuration..."
     
@@ -176,7 +180,9 @@ validate() {
     log_success "Configuration validation completed"
 }
 
-# Add service to Traefik network
+# add_service connects a specified Docker container to the Traefik network for reverse proxy management.
+# 
+# The function requires the container name or ID as an argument. If the container does not exist or is already connected, an error is logged.
 add_service() {
     local service_name="$1"
     
@@ -196,7 +202,7 @@ add_service() {
     fi
 }
 
-# Show help
+# help displays usage instructions, available commands, and example invocations for the Traefik management script.
 help() {
     echo "Traefik Management Script"
     echo ""

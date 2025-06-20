@@ -17,6 +17,11 @@ import urllib.parse
 class AlertWebhookHandler(BaseHTTPRequestHandler):
     
     def do_POST(self):
+        """
+        Handle incoming POST requests containing Alertmanager alert notifications.
+        
+        Parses the JSON payload from the request, extracts and displays alert metadata and details to the terminal with formatted output, and responds with a JSON acknowledgment including the timestamp, alert count, and request path. If parsing or processing fails, responds with a 500 error and a JSON error message.
+        """
         content_length = int(self.headers.get('Content-Length', 0))
         post_data = self.rfile.read(content_length)
         
@@ -113,6 +118,9 @@ class AlertWebhookHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(error_response).encode('utf-8'))
     
     def do_GET(self):
+        """
+        Responds to GET requests with an HTML page displaying server status, usage instructions, example Alertmanager configuration, and available test routes.
+        """
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
@@ -162,6 +170,14 @@ webhook_configs:<br>
         self.wfile.write(html.encode('utf-8'))
 
 def run_server(port=5001):
+    """
+    Start the Alertmanager webhook test server on the specified port.
+    
+    The server listens for incoming HTTP requests, handling Alertmanager alert POSTs and serving an informational HTML page on GET requests. Runs indefinitely until interrupted by the user.
+    
+    Parameters:
+        port (int, optional): The port number to bind the server to. Defaults to 5001.
+    """
     server_address = ('', port)
     httpd = HTTPServer(server_address, AlertWebhookHandler)
     

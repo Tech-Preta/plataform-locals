@@ -39,32 +39,32 @@ readonly KEYCLOAK_SERVICE="keycloak"
 # FUNÇÕES UTILITÁRIAS
 # ==============================================================================
 
-# Função para logging
+# log writes a timestamped message to stdout in white and appends it to the log file.
 log() {
     echo -e "${WHITE}[$(date +'%Y-%m-%d %H:%M:%S')] $*${NC}" | tee -a "$LOG_FILE"
 }
 
-# Função para logging de erro
+# log_error logs an error message with a timestamp in red and appends it to the log file.
 log_error() {
     echo -e "${RED}[$(date +'%Y-%m-%d %H:%M:%S')] ERROR: $*${NC}" | tee -a "$LOG_FILE" >&2
 }
 
-# Função para logging de sucesso
+# log_success logs a success message with a timestamp in green color and appends it to the log file.
 log_success() {
     echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')] SUCCESS: $*${NC}" | tee -a "$LOG_FILE"
 }
 
-# Função para logging de warning
+# log_warning logs a warning message with a timestamp in yellow and appends it to the log file.
 log_warning() {
     echo -e "${YELLOW}[$(date +'%Y-%m-%d %H:%M:%S')] WARNING: $*${NC}" | tee -a "$LOG_FILE"
 }
 
-# Função para logging de info
+# log_info logs informational messages with a timestamp in blue color and appends them to the log file.
 log_info() {
     echo -e "${BLUE}[$(date +'%Y-%m-%d %H:%M:%S')] INFO: $*${NC}" | tee -a "$LOG_FILE"
 }
 
-# Verificar se docker-compose está disponível
+# check_docker_compose verifies that the docker-compose command is available and exits with an error if it is not found.
 check_docker_compose() {
     if ! command -v docker-compose &> /dev/null; then
         log_error "docker-compose não encontrado. Instale o Docker Compose."
@@ -72,7 +72,7 @@ check_docker_compose() {
     fi
 }
 
-# Verificar se arquivo compose existe
+# check_compose_file verifies that the Docker Compose YAML file exists at the specified path and exits with an error if it is missing.
 check_compose_file() {
     if [[ ! -f "$COMPOSE_FILE" ]]; then
         log_error "Arquivo docker-compose.yaml não encontrado em: $COMPOSE_FILE"
@@ -80,7 +80,7 @@ check_compose_file() {
     fi
 }
 
-# Criar diretório de backup se não existir
+# ensure_backup_dir creates the backup directory if it does not already exist.
 ensure_backup_dir() {
     if [[ ! -d "$BACKUP_DIR" ]]; then
         mkdir -p "$BACKUP_DIR"
@@ -88,13 +88,13 @@ ensure_backup_dir() {
     fi
 }
 
-# Verificar se serviço está rodando
+# is_service_running checks if the specified Docker Compose service is currently running.
 is_service_running() {
     local service=$1
     docker-compose -f "$COMPOSE_FILE" ps -q "$service" | grep -q .
 }
 
-# Aguardar serviço estar pronto
+# wait_for_service waits up to a specified timeout for a Docker Compose service to become ready by executing a test command inside the container. Returns success if the service is ready within the timeout, otherwise logs an error and returns failure.
 wait_for_service() {
     local service=$1
     local timeout=${2:-60}
@@ -119,7 +119,7 @@ wait_for_service() {
 # COMANDOS PRINCIPAIS
 # ==============================================================================
 
-# Mostrar ajuda
+# show_help exibe instruções detalhadas de uso, comandos disponíveis, exemplos e arquivos de configuração do script de gerenciamento do Keycloak e PostgreSQL.
 show_help() {
     cat << EOF
 ${WHITE}KEYCLOAK MANAGEMENT SCRIPT${NC}
@@ -188,7 +188,7 @@ ${YELLOW}ARQUIVOS:${NC}
 EOF
 }
 
-# Iniciar serviços
+# start_services starts all Keycloak and PostgreSQL services using Docker Compose, waits for them to become ready, and displays service URLs.
 start_services() {
     log_info "Iniciando serviços Keycloak..."
     check_compose_file
@@ -210,14 +210,14 @@ start_services() {
     show_service_urls
 }
 
-# Parar serviços
+# stop_services stops all Keycloak and PostgreSQL services using Docker Compose.
 stop_services() {
     log_info "Parando serviços Keycloak..."
     docker-compose -f "$COMPOSE_FILE" down
     log_success "Serviços parados!"
 }
 
-# Reiniciar serviços
+# restart_services stops all services, waits briefly, and then starts them again.
 restart_services() {
     log_info "Reiniciando serviços Keycloak..."
     stop_services
@@ -225,7 +225,7 @@ restart_services() {
     start_services
 }
 
-# Status dos serviços
+# show_status displays the running and health status of all managed services.
 show_status() {
     log_info "Status dos serviços:"
     docker-compose -f "$COMPOSE_FILE" ps
@@ -242,7 +242,7 @@ show_status() {
     done
 }
 
-# Mostrar logs
+# show_logs displays recent logs for a specified Docker Compose service or for all services, tailing a given number of lines (default 100).
 show_logs() {
     local service=${1:-}
     local lines=${2:-100}
@@ -256,7 +256,7 @@ show_logs() {
     fi
 }
 
-# Mostrar URLs dos serviços
+# show_service_urls displays the URLs for Keycloak admin, account, health, metrics, and PostgreSQL services, along with default admin credentials.
 show_service_urls() {
     echo
     log_success "Serviços disponíveis:"
@@ -275,7 +275,7 @@ show_service_urls() {
 # COMANDOS DE BACKUP/RESTORE
 # ==============================================================================
 
-# Criar backup
+# create_backup creates a compressed backup of the Keycloak PostgreSQL database and stores it in the backup directory.
 create_backup() {
     ensure_backup_dir
     
@@ -308,7 +308,7 @@ create_backup() {
     fi
 }
 
-# Restaurar backup
+# restore_backup restores the PostgreSQL database from a specified backup file, supporting both plain and compressed (.gz) formats, and prompts for confirmation before overwriting existing data.
 restore_backup() {
     local backup_file=$1
     
@@ -363,7 +363,7 @@ restore_backup() {
     log_info "Reinicie o Keycloak para aplicar as mudanças"
 }
 
-# Listar backups
+# list_backups lists available PostgreSQL backup files in the backup directory, displaying their details or a warning if none are found.
 list_backups() {
     ensure_backup_dir
     
@@ -378,7 +378,7 @@ list_backups() {
     fi
 }
 
-# Limpeza de backups antigos
+# cleanup_backups deletes backup files older than a specified number of days from the backup directory.
 cleanup_backups() {
     local days=${1:-7}
     ensure_backup_dir
@@ -399,25 +399,27 @@ cleanup_backups() {
 # COMANDOS DE ADMINISTRAÇÃO
 # ==============================================================================
 
-# Shell no container Keycloak
+# keycloak_shell opens an interactive shell session inside the Keycloak container.
 keycloak_shell() {
     log_info "Abrindo shell no container Keycloak..."
     docker-compose -f "$COMPOSE_FILE" exec "$KEYCLOAK_SERVICE" /bin/bash
 }
 
-# Shell no container PostgreSQL
+# db_shell opens an interactive shell inside the PostgreSQL container.
 db_shell() {
     log_info "Abrindo shell no container PostgreSQL..."
     docker-compose -f "$COMPOSE_FILE" exec "$DB_SERVICE" /bin/bash
 }
 
-# Console do PostgreSQL
+# db_console opens an interactive PostgreSQL console connected to the Keycloak database inside the database container.
 db_console() {
     log_info "Conectando ao console PostgreSQL..."
     docker-compose -f "$COMPOSE_FILE" exec "$DB_SERVICE" psql -U keycloak keycloak
 }
 
-# Exportar realm
+# export_realm exports a specified Keycloak realm to a JSON file in the backup directory.
+#
+# Prompts for the realm name if not provided, performs the export inside the Keycloak container, and saves the resulting file with a timestamped name. Logs success or error based on the outcome.
 export_realm() {
     local realm=${1:-}
     
@@ -447,7 +449,10 @@ export_realm() {
     fi
 }
 
-# Importar realm
+# import_realm imports a Keycloak realm from a specified JSON file into the Keycloak service container.
+# 
+# The function copies the provided realm JSON file into the Keycloak container and executes the import command.
+# Logs an error and returns if the file is not specified or does not exist.
 import_realm() {
     local realm_file=$1
     
@@ -478,7 +483,7 @@ import_realm() {
 # COMANDOS DE MONITORAMENTO
 # ==============================================================================
 
-# Verificar health
+# check_health checks the health status of the Keycloak and PostgreSQL services, displaying their current state and health information if available.
 check_health() {
     log_info "Verificando health dos serviços..."
     
@@ -509,7 +514,7 @@ check_health() {
     fi
 }
 
-# Mostrar métricas
+# show_metrics fetches and displays Keycloak metrics from the local metrics endpoint if the service is running.
 show_metrics() {
     log_info "Métricas do Keycloak:"
     
@@ -525,13 +530,13 @@ show_metrics() {
     fi
 }
 
-# Estatísticas dos containers
+# show_stats displays real-time resource usage statistics for all Docker Compose service containers.
 show_stats() {
     log_info "Estatísticas dos containers:"
     docker-compose -f "$COMPOSE_FILE" ps -q | xargs docker stats --no-stream
 }
 
-# Processos dos containers
+# show_top displays the running processes inside each active service container managed by Docker Compose.
 show_top() {
     log_info "Processos dos containers:"
     for service in "${SERVICES[@]}"; do
@@ -546,14 +551,14 @@ show_top() {
 # COMANDOS DE LIMPEZA
 # ==============================================================================
 
-# Limpeza básica
+# clean_containers removes all stopped Docker Compose containers for the configured services.
 clean_containers() {
     log_info "Removendo containers parados..."
     docker-compose -f "$COMPOSE_FILE" rm -f
     log_success "Containers parados removidos"
 }
 
-# Reset completo
+# reset_all performs a full reset by removing all containers, volumes, and orphans, erasing all Keycloak and PostgreSQL data after user confirmation.
 reset_all() {
     log_warning "ATENÇÃO: Esta operação irá remover TODOS os dados!"
     echo "Isso inclui:"
@@ -577,7 +582,7 @@ reset_all() {
     log_info "Execute '$0 start' para recriar os serviços"
 }
 
-# Limpeza geral do Docker
+# prune_docker removes unused Docker data and resources from the system.
 prune_docker() {
     log_info "Executando limpeza geral do Docker..."
     docker system prune -f
@@ -588,7 +593,7 @@ prune_docker() {
 # COMANDOS DE CONFIGURAÇÃO
 # ==============================================================================
 
-# Configuração inicial
+# setup_initial performs initial setup by verifying dependencies, creating the environment file from an example if needed, and ensuring the backup directory exists. Outputs next steps for configuring and starting services.
 setup_initial() {
     log_info "Executando configuração inicial..."
     
@@ -617,7 +622,7 @@ setup_initial() {
     echo "  3. Acesse: http://localhost:8080/admin"
 }
 
-# Atualizar imagens
+# update_images pulls the latest Docker images for all services defined in the Docker Compose file and advises restarting to apply updates.
 update_images() {
     log_info "Atualizando imagens Docker..."
     docker-compose -f "$COMPOSE_FILE" pull
@@ -625,7 +630,7 @@ update_images() {
     log_info "Execute '$0 restart' para aplicar as atualizações"
 }
 
-# Mostrar configuração atual
+# show_config displays the current configuration files, environment variables, backup directory, log file, and lists Docker Compose services.
 show_config() {
     log_info "Configuração atual:"
     echo
@@ -649,7 +654,10 @@ show_config() {
 
 # ==============================================================================
 # FUNÇÃO PRINCIPAL
-# ==============================================================================
+# main parses the command-line arguments and dispatches the requested command to the appropriate function.
+#
+# Handles service control, backup and restore, administration, monitoring, cleanup, configuration, and help commands for Keycloak and PostgreSQL management via Docker Compose.
+# If an invalid or missing command is provided, displays help and exits with an error.
 
 main() {
     local command=${1:-}

@@ -20,6 +20,7 @@ CROSS="❌"
 INFO="ℹ️"
 ROBOT="🤖"
 
+# print_header prints a formatted header identifying the Ollama and Open WebUI Manager script.
 print_header() {
     echo -e "${BLUE}================================"
     echo -e "🤖 Ollama + Open WebUI Manager"
@@ -27,6 +28,7 @@ print_header() {
     echo
 }
 
+# print_usage displays usage instructions and lists all available commands for managing Ollama and Open WebUI services.
 print_usage() {
     echo -e "${YELLOW}Uso: $0 [comando]${NC}"
     echo
@@ -48,6 +50,7 @@ print_usage() {
     echo
 }
 
+# check_requirements verifies that Docker and Docker Compose are installed, exiting with an error if either is missing.
 check_requirements() {
     if ! command -v docker &> /dev/null; then
         echo -e "${CROSS} ${RED}Docker não encontrado. Instale o Docker primeiro.${NC}"
@@ -60,6 +63,7 @@ check_requirements() {
     fi
 }
 
+# start_services starts the Ollama and Open WebUI Docker services, waits for initialization, and checks their availability.
 start_services() {
     echo -e "${ROCKET} ${GREEN}Iniciando Ollama + Open WebUI...${NC}"
     docker compose up -d
@@ -77,18 +81,21 @@ start_services() {
     fi
 }
 
+# stop_services stops all running Docker Compose services for Ollama and Open WebUI.
 stop_services() {
     echo -e "${INFO} ${BLUE}Parando serviços...${NC}"
     docker compose down
     echo -e "${CHECK} ${GREEN}Serviços parados.${NC}"
 }
 
+# restart_services restarts all Docker Compose services for Ollama and Open WebUI.
 restart_services() {
     echo -e "${INFO} ${BLUE}Reiniciando serviços...${NC}"
     docker compose restart
     echo -e "${CHECK} ${GREEN}Serviços reiniciados.${NC}"
 }
 
+# show_status displays the status of Docker Compose services and checks connectivity to the Ollama API and Open WebUI endpoints.
 show_status() {
     echo -e "${INFO} ${BLUE}Status dos serviços:${NC}"
     docker compose ps
@@ -109,11 +116,13 @@ show_status() {
     fi
 }
 
+# show_logs streams real-time logs from all Docker Compose services until interrupted.
 show_logs() {
     echo -e "${INFO} ${BLUE}Logs dos serviços (Ctrl+C para sair):${NC}"
     docker compose logs -f
 }
 
+# list_models displays the list of installed Ollama models or provides guidance if none are found.
 list_models() {
     echo -e "${ROBOT} ${BLUE}Modelos instalados:${NC}"
     if docker exec ollama ollama list 2>/dev/null; then
@@ -125,6 +134,7 @@ list_models() {
     fi
 }
 
+# pull_model downloads a specified Ollama model inside the container, displaying usage instructions and popular models if no model name is provided, and reports the result.
 pull_model() {
     if [ -z "$2" ]; then
         echo -e "${WARNING} ${YELLOW}Uso: $0 pull <nome-do-modelo>${NC}"
@@ -150,6 +160,7 @@ pull_model() {
     fi
 }
 
+# remove_model removes a specified Ollama model from the container after user confirmation. If no model name is provided, it displays usage instructions.
 remove_model() {
     if [ -z "$2" ]; then
         echo -e "${WARNING} ${YELLOW}Uso: $0 remove <nome-do-modelo>${NC}"
@@ -170,6 +181,7 @@ remove_model() {
     fi
 }
 
+# backup_data creates compressed backup archives of Ollama and Open WebUI Docker volumes in the local backups directory, naming them with a timestamp.
 backup_data() {
     BACKUP_DIR="./backups"
     DATE=$(date +%Y%m%d_%H%M%S)
@@ -193,6 +205,7 @@ backup_data() {
     echo -e "  ${BLUE}WebUI:  $BACKUP_DIR/webui-backup-$DATE.tar.gz${NC}"
 }
 
+# restore_data restores Ollama and Open WebUI data volumes from selected backup files, overwriting current data after user confirmation.
 restore_data() {
     BACKUP_DIR="./backups"
     
@@ -236,6 +249,7 @@ restore_data() {
     fi
 }
 
+# clean_all removes all Ollama and Open WebUI data, including models, conversations, and configurations, after explicit user confirmation.
 clean_all() {
     echo -e "${WARNING} ${RED}ATENÇÃO: Isso irá remover TODOS os dados!${NC}"
     echo -e "${WARNING} ${RED}- Todos os modelos baixados${NC}"
@@ -261,6 +275,9 @@ clean_all() {
     fi
 }
 
+# initial_setup performs the initial configuration for Ollama and Open WebUI, creating a .env file, generating secret keys, and starting the services.
+#
+# If a .env file already exists, prompts for overwrite confirmation. Copies .env.example to .env, replaces secret placeholders with generated values, and starts the Docker services. Prints next steps for user setup.
 initial_setup() {
     echo -e "${ROCKET} ${GREEN}Configuração inicial do Ollama + Open WebUI${NC}"
     
@@ -302,6 +319,7 @@ initial_setup() {
     echo -e "4. Comece a conversar!"
 }
 
+# update_images pulls the latest Docker images for all services and restarts them.
 update_images() {
     echo -e "${INFO} ${BLUE}Atualizando imagens Docker...${NC}"
     docker compose pull
@@ -309,6 +327,7 @@ update_images() {
     echo -e "${CHECK} ${GREEN}Imagens atualizadas!${NC}"
 }
 
+# health_check displays the status and health of Ollama and Open WebUI Docker services, including container status, API connectivity, installed model count, resource usage, and disk space.
 health_check() {
     echo -e "${INFO} ${BLUE}Verificando saúde dos serviços...${NC}"
     
@@ -346,7 +365,7 @@ health_check() {
     docker system df
 }
 
-# Função principal
+# main parses the first command-line argument and dispatches the corresponding Ollama/Open WebUI management command.
 main() {
     check_requirements
     
