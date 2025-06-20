@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v3.1
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      # API and dashboard configuration
+      - --api.dashboard=true
+      - --api.insecure=true  # For development only
+      # - --api.insecure=false  # For production
+      
+      # Entry points
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.traefik.address=:8080
+      
+      # Providers
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=traefik-network
+      - --providers.file.directory=/etc/traefik/dynamic
+      - --providers.file.watch=true
+      
+      # Certificate resolvers (Let's Encrypt)
+      - --certificatesresolvers.letsencrypt.acme.email=admin@localhost
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      # - --certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory  # Staging for testing
+      
+      # Global redirect from HTTP to HTTPS (uncomment for production)
+      # - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      # - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      
+      # Logging
+      - --log.level=INFO
+      - --accesslog=true
+      - --accesslog.filepath=/var/log/traefik/access.log
+      - --log.filepath=/var/log/traefik/traefik.log
+      
+      # Metrics (Prometheus)
+      - --metrics.prometheus=true
+      - --metrics.prometheus.addEntryPointsLabels=true
+      - --metrics.prometheus.addServicesLabels=true
+      
+    ports:
+      - "80:80"       # HTTP
+      - "443:443"     # HTTPS
+      - "8080:8080"   # Traefik Dashboard
+      
+    volumes:
+      # Docker socket for auto-discovery
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      
+      # Traefik configuration
+      - ./config:/etc/traefik/dynamic:ro
+      
+      # SSL certificates storage
+      - ./letsencrypt:/letsencrypt
+      
+      # Logs
+      - ./logs:/var/log/traefik
+      
+    networks:
+      - traefik-network
+      
+    labels:
+      # Enable Traefik for this service
+      - traefik.enable=true
+      
+      # Dashboard
+      - traefik.http.routers.traefik.rule=Host(`traefik.localhost`)
+      - traefik.http.routers.traefik.entrypoints=web
+      - traefik.http.routers.traefik.service=api@internal
+      
+      # HTTPS Dashboard (uncomment for production)
+      # - traefik.http.routers.traefik-secure.rule=Host(`traefik.yourdomain.com`)
+      # - traefik.http.routers.traefik-secure.entrypoints=websecure
+      # - traefik.http.routers.traefik-secure.tls=true
+      # - traefik.http.routers.traefik-secure.tls.certresolver=letsencrypt
+      # - traefik.http.routers.traefik-secure.service=api@internal
+      
+      # Middleware for basic auth (uncomment for production)
+      # - traefik.http.middlewares.traefik-auth.basicauth.users=admin:$$2y$$10$$hash  # Generate with htpasswd
+      # - traefik.http.routers.traefik-secure.middlewares=traefik-auth
+      
+      # Prometheus metrics
+      - traefik.http.routers.metrics.rule=Host(`traefik.localhost`) && Path(`/metrics`)
+      - traefik.http.routers.metrics.entrypoints=web
+      - traefik.http.routers.metrics.service=prometheus@internal
+      
+    environment:
+      - TRAEFIK_LOG_LEVEL=INFO
+
+networks:
+  traefik-network:
+    external: true
+    # If the network doesn't exist, create it with:
+    # docker network create traefik-network
+
+volumes:
+  letsencrypt:
+    driver: local

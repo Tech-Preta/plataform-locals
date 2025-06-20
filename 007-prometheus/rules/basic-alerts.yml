@@ -1,0 +1,149 @@
+groups:
+  - name: system-alerts
+    rules:
+      # High CPU usage alert
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 3m
+        labels:
+          severity: warning
+          service: system
+          category: performance
+        annotations:
+          summary: "High CPU usage detected on {{ $labels.instance }}"
+          description: 'CPU usage is above 85% for more than 3 minutes on {{ $labels.instance }}. Current value: {{ printf "%.2f" $value }}%'
+          runbook_url: "https://runbooks.prometheus-operator.dev/runbooks/node/nodecpuhigh"
+
+      # Critical CPU usage alert
+      - alert: CriticalCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 95
+        for: 1m
+        labels:
+          severity: critical
+          service: system
+          category: performance
+        annotations:
+          summary: "CRITICAL CPU usage detected on {{ $labels.instance }}"
+          description: 'CPU usage is above 95% for more than 1 minute on {{ $labels.instance }}. Current value: {{ printf "%.2f" $value }}%'
+
+      # High memory usage alert
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 80
+        for: 3m
+        labels:
+          severity: warning
+          service: system
+          category: memory
+        annotations:
+          summary: "High memory usage detected on {{ $labels.instance }}"
+          description: 'Memory usage is above 80% for more than 3 minutes on {{ $labels.instance }}. Current value: {{ printf "%.2f" $value }}%'
+
+      # Critical memory usage alert
+      - alert: CriticalMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+        for: 1m
+        labels:
+          severity: critical
+          service: system
+          category: memory
+        annotations:
+          summary: "CRITICAL memory usage detected on {{ $labels.instance }}"
+          description: 'Memory usage is above 90% for more than 1 minute on {{ $labels.instance }}. Current value: {{ printf "%.2f" $value }}%'
+
+      # Low disk space warning
+      - alert: LowDiskSpace
+        expr: (node_filesystem_avail_bytes{mountpoint!~"/boot.*"} / node_filesystem_size_bytes{mountpoint!~"/boot.*"}) * 100 < 20
+        for: 2m
+        labels:
+          severity: warning
+          service: system
+          category: storage
+        annotations:
+          summary: "Low disk space on {{ $labels.instance }}"
+          description: 'Disk space is below 20% on {{ $labels.instance }} at {{ $labels.mountpoint }}. Current value: {{ printf "%.2f" $value }}%'
+
+      # Critical disk space alert
+      - alert: CriticalDiskSpace
+        expr: (node_filesystem_avail_bytes{mountpoint!~"/boot.*"} / node_filesystem_size_bytes{mountpoint!~"/boot.*"}) * 100 < 10
+        for: 1m
+        labels:
+          severity: critical
+          service: system
+          category: storage
+        annotations:
+          summary: "CRITICAL disk space on {{ $labels.instance }}"
+          description: 'Disk space is below 10% on {{ $labels.instance }} at {{ $labels.mountpoint }}. Current value: {{ printf "%.2f" $value }}%'
+
+      # Node down alert
+      - alert: NodeDown
+        expr: up{job="node-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: system
+          category: availability
+        annotations:
+          summary: "Node Exporter is down"
+          description: "Node Exporter on {{ $labels.instance }} has been down for more than 1 minute"
+
+  - name: container-alerts
+    rules:
+      # Container down alert
+      - alert: ContainerDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: docker
+          category: availability
+        annotations:
+          summary: "Container {{ $labels.job }} is down"
+          description: "Container {{ $labels.job }} on {{ $labels.instance }} has been down for more than 2 minutes"
+
+      # High container memory usage
+      - alert: ContainerHighMemoryUsage
+        expr: (container_memory_usage_bytes{name!=""} / container_spec_memory_limit_bytes{name!=""}) * 100 > 85
+        for: 3m
+        labels:
+          severity: warning
+          service: docker
+          category: memory
+        annotations:
+          summary: "Container {{ $labels.name }} high memory usage"
+          description: 'Container {{ $labels.name }} memory usage is above 85% for more than 3 minutes. Current value: {{ printf "%.2f" $value }}%'
+
+      # Critical container memory usage
+      - alert: ContainerCriticalMemoryUsage
+        expr: (container_memory_usage_bytes{name!=""} / container_spec_memory_limit_bytes{name!=""}) * 100 > 95
+        for: 1m
+        labels:
+          severity: critical
+          service: docker
+          category: memory
+        annotations:
+          summary: "Container {{ $labels.name }} CRITICAL memory usage"
+          description: 'Container {{ $labels.name }} memory usage is above 95% for more than 1 minute. Current value: {{ printf "%.2f" $value }}%'
+
+      # High container CPU usage
+      - alert: ContainerHighCPUUsage
+        expr: (rate(container_cpu_usage_seconds_total{name!=""}[5m]) * 100) > 80
+        for: 3m
+        labels:
+          severity: warning
+          service: docker
+          category: performance
+        annotations:
+          summary: "Container {{ $labels.name }} high CPU usage"
+          description: 'Container {{ $labels.name }} CPU usage is above 80% for more than 3 minutes. Current value: {{ printf "%.2f" $value }}%'
+
+      # Container restart alert
+      - alert: ContainerRestartingTooMuch
+        expr: rate(container_last_seen{name!=""}[1h]) > 1/300
+        for: 5m
+        labels:
+          severity: warning
+          service: docker
+          category: stability
+        annotations:
+          summary: "Container {{ $labels.name }} is restarting too frequently"
+          description: "Container {{ $labels.name }} has restarted more than 12 times in the last hour"

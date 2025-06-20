@@ -1,0 +1,26 @@
+# /etc/hosts configuration for Traefik local testing
+# Add these lines to your /etc/hosts file for local domain resolution
+
+# Traefik Dashboard
+127.0.0.1 traefik.localhost
+
+# Test Applications
+127.0.0.1 app.localhost
+127.0.0.1 api.localhost  
+127.0.0.1 admin.localhost
+
+# Other services (examples)
+127.0.0.1 grafana.localhost
+127.0.0.1 prometheus.localhost
+127.0.0.1 vault.localhost
+127.0.0.1 portainer.localhost
+
+# Instructions:
+# 1. Open /etc/hosts as administrator/root:
+#    sudo nano /etc/hosts
+#
+# 2. Add the lines above to the end of the file
+#
+# 3. Save and close the file
+#
+# 4. Test with: ping traefik.localhost

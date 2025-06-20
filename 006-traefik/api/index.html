@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .endpoint {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid #00ff88;
+        }
+
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .method {
+            background: #28a745;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🔌 API Test Service</h1>
+
+        <p>This is a simple API test service served through Traefik with rate limiting enabled.</p>
+
+        <div class="endpoint">
+            <h3><span class="method">GET</span> /</h3>
+            <p>Returns this HTML page</p>
+            <p><strong>URL:</strong> <code>http://api.localhost/</code></p>
+        </div>
+
+        <div class="endpoint">
+            <h3><span class="method">GET</span> /health</h3>
+            <p>Health check endpoint</p>
+            <p><strong>URL:</strong> <code>http://api.localhost/health</code></p>
+            <p><strong>Response:</strong> <code>{"status": "ok"}</code></p>
+        </div>
+
+        <div class="endpoint">
+            <h3><span class="method">GET</span> /info</h3>
+            <p>Service information</p>
+            <p><strong>URL:</strong> <code>http://api.localhost/info</code></p>
+        </div>
+
+        <p><strong>Rate Limiting:</strong> This service has rate limiting enabled via Traefik middleware. Try making
+            many requests quickly to see it in action.</p>
+
+        <p><strong>Middlewares Applied:</strong></p>
+        <ul>
+            <li>rate-limit</li>
+            <li>security-headers</li>
+        </ul>
+    </div>
+</body>
+
+</html>

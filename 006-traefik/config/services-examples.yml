@@ -1,0 +1,108 @@
+# Example Services Configuration
+# This file shows how to configure different types of services with Traefik
+
+http:
+  routers:
+    # Example: Simple web application
+    webapp-router:
+      rule: "Host(`app.localhost`)"
+      entrypoints:
+        - "web"
+      service: "webapp-service"
+      middlewares:
+        - "compression"
+        - "security-headers"
+
+    # Example: Secure web application with HTTPS
+    webapp-secure-router:
+      rule: "Host(`app.yourdomain.com`)"
+      entrypoints:
+        - "websecure"
+      service: "webapp-service"
+      tls:
+        certResolver: "letsencrypt"
+      middlewares:
+        - "compression"
+        - "security-headers"
+        - "rate-limit"
+
+    # Example: API with path prefix
+    api-router:
+      rule: "Host(`api.localhost`) && PathPrefix(`/v1`)"
+      entrypoints:
+        - "web"
+      service: "api-service"
+      middlewares:
+        - "strip-prefix"
+        - "rate-limit"
+
+    # Example: Admin panel with authentication
+    admin-router:
+      rule: "Host(`admin.localhost`)"
+      entrypoints:
+        - "web"
+      service: "admin-service"
+      middlewares:
+        - "basic-auth"
+        - "admin-whitelist"
+        - "security-headers"
+
+  services:
+    # Example: Standard web application
+    webapp-service:
+      loadBalancer:
+        servers:
+          - url: "http://webapp:3000"
+        healthCheck:
+          path: "/health"
+          interval: "30s"
+          timeout: "5s"
+
+    # Example: API service with multiple servers
+    api-service:
+      loadBalancer:
+        servers:
+          - url: "http://api-1:8080"
+          - url: "http://api-2:8080"
+        sticky:
+          cookie:
+            name: "api-server"
+            secure: true
+            httpOnly: true
+
+    # Example: Admin service
+    admin-service:
+      loadBalancer:
+        servers:
+          - url: "http://admin:8080"
+
+# TCP Services (for non-HTTP services)
+tcp:
+  routers:
+    # Example: Database proxy
+    postgres-router:
+      rule: "HostSNI(`*`)"
+      entrypoints:
+        - "postgres"
+      service: "postgres-service"
+
+  services:
+    postgres-service:
+      loadBalancer:
+        servers:
+          - address: "postgres:5432"
+
+# UDP Services (for UDP traffic)
+udp:
+  routers:
+    # Example: DNS server
+    dns-router:
+      entrypoints:
+        - "dns"
+      service: "dns-service"
+
+  services:
+    dns-service:
+      loadBalancer:
+        servers:
+          - address: "dns-server:53"

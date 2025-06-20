@@ -1,1 +1,203 @@
+# ===================================
+# Platform Locals - GitIgnore
+# ===================================
 
+# ===================
+# VAULT - Dados sensíveis e runtime
+# ===================
+# 005-vault/data/  # Comentado para permitir commit dos dados do vault
+005-vault/file/
+005-vault/logs/
+005-vault/plugins/
+005-vault/audit/
+005-vault/*.log
+
+# ===================
+# PROMETHEUS - Dados de métricas
+# ===================
+007-prometheus/data/
+**/prometheus-data/
+
+# ===================
+# ALERTMANAGER - Dados de alertas
+# ===================
+004-alertmanager/data/
+**/alertmanager-data/
+
+# ===================
+# GRAFANA - Dados de dashboards
+# ===================
+003-grafana/data/
+**/grafana-data/
+
+# ===================
+# OPENSEARCH - Dados de índices
+# ===================
+002-opensearch/data/
+**/opensearch-data/
+
+# ===================
+# MINIO - Dados de objetos
+# ===================
+001-minio/data/
+**/minio-data/
+
+# ===================
+# TRAEFIK - Logs e certificados
+# ===================
+006-traefik/logs/
+006-traefik/letsencrypt/
+**/traefik-logs/
+**/letsencrypt/
+
+# ===================
+# OLLAMA - Modelos e dados
+# ===================
+012-ollama/data/
+**/ollama-data/
+**/open-webui-data/
+
+# ===================
+# KEYCLOAK - Dados do banco
+# ===================
+014-keycloack/data/
+**/keycloak-data/
+**/postgres-data/
+
+# ===================
+# PORTAINER - Dados de configuração
+# ===================
+009-portainer/data/
+**/portainer-data/
+
+# ===================
+# N8N - Dados de workflows
+# ===================
+013-n8n/data/
+**/n8n-data/
+
+# ===================
+# ZABBIX - Dados de monitoramento
+# ===================
+011-zabbix/data/
+**/zabbix-data/
+
+# ===================
+# HOMEPAGE - Cache
+# ===================
+008-homepage/data/
+**/homepage-data/
+
+# ===================
+# DOCKER - Volumes e dados
+# ===================
+**/volumes/
+**/*-data/
+**/*-logs/
+**/*-config/data/
+
+# ===================
+# LOGS GERAIS
+# ===================
+*.log
+logs/
+**/*.log
+**/logs/
+
+# ===================
+# CERTIFICADOS E CHAVES
+# ===================
+*.key
+*.crt
+*.pem
+*.p12
+*.jks
+**/tls/
+**/ssl/
+**/certs/
+
+# ===================
+# BACKUPS
+# ===================
+backups/
+**/backups/
+*.backup
+*.tar.gz
+*.zip
+
+# ===================
+# ARQUIVOS TEMPORÁRIOS
+# ===================
+.tmp/
+tmp/
+temp/
+**/tmp/
+**/.tmp/
+
+# ===================
+# CONFIGURAÇÕES LOCAIS
+# ===================
+.env
+.env.local
+.env.production
+**/.env
+**/.env.local
+
+# ===================
+# IDE E EDITORES
+# ===================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ===================
+# SISTEMA OPERACIONAL
+# ===================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ===================
+# DOCKER
+# ===================
+.dockerignore
+
+# ===================
+# NODE.JS (se houver)
+# ===================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===================
+# PYTHON (se houver)
+# ===================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ===================
+# TERRAFORM (se houver)
+# ===================
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+terraform.tfvars
+
+# ===================
+# KUBERNETES (se houver)
+# ===================
+kubeconfig
+*.kubeconfig
