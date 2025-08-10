@@ -1,0 +1,22 @@
+# Arquivos do Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfplan
+
+# Arquivos sensíveis
+*.pem
+*.key
+.env
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
