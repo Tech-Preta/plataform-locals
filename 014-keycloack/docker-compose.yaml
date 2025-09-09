@@ -1,0 +1,130 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database for Keycloak
+  keycloak-db:
+    image: postgres:15-alpine
+    container_name: keycloak-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak_password_change_this
+      POSTGRES_ROOT_PASSWORD: postgres_root_password_change_this
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"  # Remove in production
+    networks:
+      - keycloak-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Keycloak Identity and Access Management
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: keycloak
+    restart: unless-stopped
+    command:
+      - start
+      - --optimized
+      - --import-realm
+    environment:
+      # Database configuration
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak_password_change_this
+      KC_DB_SCHEMA: public
+      
+      # Keycloak admin user
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin_password_change_this
+      
+      # Hostname and proxy configuration
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8080
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_PROXY: edge
+      
+      # HTTP configuration  
+      KC_HTTP_ENABLED: true
+      KC_HTTP_PORT: 8080
+      KC_HTTPS_PORT: 8443
+      
+      # Health and metrics
+      KC_HEALTH_ENABLED: true
+      KC_METRICS_ENABLED: true
+      
+      # Logging
+      KC_LOG_LEVEL: INFO
+      KC_LOG_CONSOLE_COLOR: true
+      
+      # Performance tuning
+      KC_CACHE: ispn
+      KC_CACHE_STACK: tcp
+      
+      # Features
+      KC_FEATURES: token-exchange,admin-fine-grained-authz,declarative-user-profile
+      
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+      - "9990:9990"  # Management interface
+    volumes:
+      # Import realm configurations on startup
+      - ./realms:/opt/keycloak/data/import:ro
+      
+      # Themes customization
+      - ./themes:/opt/keycloak/themes:ro
+      
+      # Providers/extensions
+      - ./providers:/opt/keycloak/providers:ro
+      
+      # Custom configuration
+      - ./conf:/opt/keycloak/conf:ro
+      
+      # Data persistence
+      - keycloak-data:/opt/keycloak/data
+      
+    networks:
+      - keycloak-network
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health/ready || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    labels:
+      # Traefik integration (if using Traefik)
+      - traefik.enable=true
+      - traefik.http.routers.keycloak.rule=Host(`auth.localhost`)
+      - traefik.http.routers.keycloak.entrypoints=web
+      - traefik.http.services.keycloak.loadbalancer.server.port=8080
+      - traefik.http.routers.keycloak.middlewares=security-headers
+      
+      # HTTPS router (for production)
+      # - traefik.http.routers.keycloak-secure.rule=Host(`auth.yourdomain.com`)
+      # - traefik.http.routers.keycloak-secure.entrypoints=websecure
+      # - traefik.http.routers.keycloak-secure.tls=true
+      # - traefik.http.routers.keycloak-secure.tls.certresolver=letsencrypt
+
+networks:
+  keycloak-network:
+    driver: bridge
+    name: keycloak-network
+
+volumes:
+  keycloak-db-data:
+    driver: local
+  keycloak-data:
+    driver: local
