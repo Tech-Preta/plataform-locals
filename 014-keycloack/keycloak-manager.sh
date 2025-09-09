@@ -195,10 +195,18 @@ start_services() {
     
     if [[ -f "$ENV_FILE" ]]; then
         log_info "Usando arquivo .env: $ENV_FILE"
-        docker-compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d
+        if command -v docker compose &> /dev/null; then
+            docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d
+        else
+            docker-compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d
+        fi
     else
         log_warning "Arquivo .env não encontrado, usando valores padrão"
-        docker-compose -f "$COMPOSE_FILE" up -d
+        if command -v docker compose &> /dev/null; then
+            docker compose -f "$COMPOSE_FILE" up -d
+        else
+            docker-compose -f "$COMPOSE_FILE" up -d
+        fi
     fi
     
     log_success "Serviços iniciados!"
@@ -213,7 +221,11 @@ start_services() {
 # Parar serviços
 stop_services() {
     log_info "Parando serviços Keycloak..."
-    docker-compose -f "$COMPOSE_FILE" down
+    if command -v docker compose &> /dev/null; then
+        docker compose -f "$COMPOSE_FILE" down
+    else
+        docker-compose -f "$COMPOSE_FILE" down
+    fi
     log_success "Serviços parados!"
 }
 
