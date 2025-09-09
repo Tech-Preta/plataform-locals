@@ -4,7 +4,7 @@ ui                      = true
 max_lease_ttl           = "2h"
 default_lease_ttl       = "20m"
 raw_storage_endpoint    = "true"
-disable_printable_check = "true"
+disable_printable_check = true
 cluster_addr            = "https://localhost:8201"
 api_addr                = "https://localhost:443"
 
