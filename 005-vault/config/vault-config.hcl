@@ -14,7 +14,7 @@ listener "tcp" {
   tls_client_ca_file       = "/vault/userconfig/tls/ca.crt"
   tls_cert_file            = "/vault/userconfig/tls/vault.crt"
   tls_key_file             = "/vault/userconfig/tls/vault.key"
-  tls_disable_client_certs = "true"
+  tls_disable_client_certs = true
 }
 
 storage "raft" {
